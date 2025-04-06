@@ -29,7 +29,7 @@ public class ExamSeatingApp {
         studentsField = new JTextField(5);
         inputPanel.add(studentsField);
 
-        inputPanel.add(new JLabel("Rows per Room:"));
+        inputPanel.add(new JLabel("Rows per Room: (Eg-A,B,C)"));
         rowsField = new JTextField(5);
         inputPanel.add(rowsField);
 
