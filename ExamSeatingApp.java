@@ -84,7 +84,7 @@ public class ExamSeatingApp {
             int numRows = Integer.parseInt(rowsField.getText());
             int seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
 
-            if ((numRooms * numRows * (seatsPerRow + 1) / 2) < numStudents) {
+            if ((numRooms * numRows * ((seatsPerRow + 1) / 2)) < numStudents) {
                 outputPanel.add(new JLabel("Error: Not enough seats with spacing between students!"));
                 outputPanel.revalidate();
                 outputPanel.repaint();
@@ -99,23 +99,26 @@ public class ExamSeatingApp {
             allRoomData = new LinkedList<>();
 
             for (int r = 1; r <= numRooms; r++) {
-                String[][] tableData = new String[numRows * seatsPerRow][2];
-                int rowIndex = 0;
+                java.util.List<String[]> roomDataList = new LinkedList<>();
 
                 for (int row = 0; row < numRows; row++) {
                     char rowLabel = (char) ('A' + row);
                     for (int seat = 1; seat <= seatsPerRow; seat++) {
-                        String seatLabel = rowLabel + seat;
-                        tableData[rowIndex][0] = seatLabel;
+                        String seatLabel = rowLabel + String.valueOf(seat);
+                        String[] rowData = new String[2];
+                        rowData[0] = seatLabel;
                         if (seat % 2 == 1 && !studentQueue.isEmpty()) {
-                            tableData[rowIndex][1] = String.valueOf(studentQueue.poll());
+                            rowData[1] = String.valueOf(studentQueue.poll());
                         } else {
-                            tableData[rowIndex][1] = "-";
+                            rowData[1] = "Empty";
                         }
-                        rowIndex++;
+                        roomDataList.add(rowData);
                     }
                 }
-                allRoomData.add(tableData);
+
+                String[][] roomDataArray = new String[roomDataList.size()][2];
+                roomDataArray = roomDataList.toArray(roomDataArray);
+                allRoomData.add(roomDataArray);
             }
 
             currentRoom = 0;
@@ -140,13 +143,13 @@ public class ExamSeatingApp {
 
         String[][] data = allRoomData.get(currentRoom);
         String[] columnNames = {"Seat No.", "Roll No."};
-        JTable table = new JTable(data, columnNames);
+        table = new JTable(data, columnNames);
         table.setEnabled(false);
         table.setRowHeight(30);
         table.setFont(new Font("SansSerif", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-        scrollPane.setPreferredSize(new Dimension(frame.getWidth() - 50, 400));
+        scrollPane.setPreferredSize(new Dimension(Math.max(frame.getWidth() - 50, 600), 400));
         outputPanel.add(scrollPane);
 
         outputPanel.revalidate();
