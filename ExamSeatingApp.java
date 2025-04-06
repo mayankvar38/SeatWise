@@ -7,88 +7,102 @@ import java.util.Queue;
 
 public class ExamSeatingApp {
     private JFrame frame;
-    private JTextArea outputArea;
+    private JTable table;
     private JTextField roomsField, studentsField, rowsField, seatsPerRowField;
-    
+    private JPanel outputPanel;
+
     public ExamSeatingApp() {
         frame = new JFrame("Exam Seating Arrangement");
-        frame.setSize(1000, 500);
+        frame.setSize(1000, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-        
+
         JPanel inputPanel = new JPanel(new FlowLayout());
         inputPanel.add(new JLabel("Number of Rooms:"));
         roomsField = new JTextField(5);
         inputPanel.add(roomsField);
-        
+
         inputPanel.add(new JLabel("Number of Students:"));
         studentsField = new JTextField(5);
         inputPanel.add(studentsField);
-        
+
         inputPanel.add(new JLabel("Rows per Room:"));
         rowsField = new JTextField(5);
         inputPanel.add(rowsField);
-        
+
         inputPanel.add(new JLabel("Seats per Row:"));
         seatsPerRowField = new JTextField(5);
         inputPanel.add(seatsPerRowField);
-        
+
         JButton generateButton = new JButton("Generate Seating Chart");
         inputPanel.add(generateButton);
-        
+
         frame.add(inputPanel, BorderLayout.NORTH);
-        
-        outputArea = new JTextArea(20, 60);
-        outputArea.setEditable(false);
-        frame.add(new JScrollPane(outputArea), BorderLayout.CENTER);
-        
+
+        outputPanel = new JPanel();
+        outputPanel.setLayout(new BoxLayout(outputPanel, BoxLayout.Y_AXIS));
+        frame.add(new JScrollPane(outputPanel), BorderLayout.CENTER);
+
         generateButton.addActionListener(e -> generateSeatingChart());
-        
+
         frame.setVisible(true);
     }
-    
+
     private void generateSeatingChart() {
+        outputPanel.removeAll();
         try {
             int numRooms = Integer.parseInt(roomsField.getText());
             int numStudents = Integer.parseInt(studentsField.getText());
             int numRows = Integer.parseInt(rowsField.getText());
             int seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
-            
+
             int totalSeats = numRooms * numRows * seatsPerRow;
-            if (totalSeats / 2 < numStudents) { // Only half seats are used due to spacing
-                outputArea.setText("Error: Not enough seats for all students!");
+            if ((numRooms * numRows * (seatsPerRow + 1) / 2) < numStudents) {
+                outputPanel.add(new JLabel("Error: Not enough seats with spacing between students!"));
+                outputPanel.revalidate();
+                outputPanel.repaint();
                 return;
             }
-            
+
             Queue<Integer> studentQueue = new LinkedList<>();
             for (int i = 1; i <= numStudents; i++) {
                 studentQueue.add(i);
             }
-            
-            StringBuilder seatingChart = new StringBuilder();
+
             for (int r = 1; r <= numRooms; r++) {
-                seatingChart.append("Room ").append(r).append(":\n");
+                outputPanel.add(new JLabel("Room " + r + ":"));
+                String[][] data = new String[numRows][seatsPerRow];
+                String[] columnNames = new String[seatsPerRow];
+
+                for (int i = 0; i < seatsPerRow; i++) {
+                    columnNames[i] = String.valueOf(i + 1);
+                }
+
                 for (int row = 0; row < numRows; row++) {
-                    char rowLabel = (char) ('A' + row);
-                    seatingChart.append(rowLabel).append(" Row: ");
-                    for (int seat = 1; seat <= seatsPerRow; seat += 2) { // Skipping every alternate seat
-                        String seatLabel = rowLabel + String.valueOf(seat);
-                        if (!studentQueue.isEmpty()) {
-                            seatingChart.append(seatLabel).append(" -> Roll No: ").append(studentQueue.poll()).append("\t");
+                    for (int seat = 0; seat < seatsPerRow; seat++) {
+                        if (seat % 2 == 0 && !studentQueue.isEmpty()) {
+                            data[row][seat] = "Roll No: " + studentQueue.poll();
                         } else {
-                            seatingChart.append(seatLabel).append(" -> EMPTY\t");
+                            data[row][seat] = "";
                         }
                     }
-                    seatingChart.append("\n");
                 }
-                seatingChart.append("\n");
+
+                JTable table = new JTable(data, columnNames);
+                table.setEnabled(false);
+                table.setRowHeight(25);
+                outputPanel.add(new JScrollPane(table));
             }
-            outputArea.setText(seatingChart.toString());
+
+            outputPanel.revalidate();
+            outputPanel.repaint();
         } catch (NumberFormatException ex) {
-            outputArea.setText("Invalid input. Please enter valid numbers.");
+            outputPanel.add(new JLabel("Invalid input. Please enter valid numbers."));
+            outputPanel.revalidate();
+            outputPanel.repaint();
         }
     }
-    
+
     public static void main(String[] args) {
         new ExamSeatingApp();
     }
