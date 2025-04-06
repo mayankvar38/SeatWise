@@ -10,6 +10,9 @@ public class ExamSeatingApp {
     private JTable table;
     private JTextField roomsField, studentsField, rowsField, seatsPerRowField;
     private JPanel outputPanel;
+    private JButton prevButton, nextButton;
+    private int currentRoom = 0;
+    private java.util.List<String[][]> allRoomData;
 
     public ExamSeatingApp() {
         frame = new JFrame("Exam Seating Arrangement");
@@ -43,7 +46,16 @@ public class ExamSeatingApp {
         outputPanel.setLayout(new BoxLayout(outputPanel, BoxLayout.Y_AXIS));
         frame.add(new JScrollPane(outputPanel), BorderLayout.CENTER);
 
+        JPanel navPanel = new JPanel();
+        prevButton = new JButton("Previous Room");
+        nextButton = new JButton("Next Room");
+        navPanel.add(prevButton);
+        navPanel.add(nextButton);
+        frame.add(navPanel, BorderLayout.SOUTH);
+
         generateButton.addActionListener(e -> generateSeatingChart());
+        prevButton.addActionListener(e -> showRoom(currentRoom - 1));
+        nextButton.addActionListener(e -> showRoom(currentRoom + 1));
 
         frame.setVisible(true);
     }
@@ -68,41 +80,54 @@ public class ExamSeatingApp {
                 studentQueue.add(i);
             }
 
-            for (int r = 1; r <= numRooms; r++) {
-                outputPanel.add(new JLabel("Room " + r + ":"));
+            allRoomData = new LinkedList<>();
 
+            for (int r = 1; r <= numRooms; r++) {
                 String[][] tableData = new String[numRows * seatsPerRow][2];
-                String[] columnNames = {"Seat No.", "Roll No."};
                 int rowIndex = 0;
 
                 for (int row = 0; row < numRows; row++) {
                     char rowLabel = (char) ('A' + row);
                     for (int seat = 1; seat <= seatsPerRow; seat++) {
                         String seatLabel = rowLabel + String.valueOf(seat);
+                        tableData[rowIndex][0] = seatLabel;
                         if (seat % 2 == 1 && !studentQueue.isEmpty()) {
-                            tableData[rowIndex][0] = seatLabel;
                             tableData[rowIndex][1] = String.valueOf(studentQueue.poll());
                         } else {
-                            tableData[rowIndex][0] = seatLabel;
                             tableData[rowIndex][1] = "-";
                         }
                         rowIndex++;
                     }
                 }
 
-                JTable table = new JTable(tableData, columnNames);
-                table.setEnabled(false);
-                table.setRowHeight(25);
-                outputPanel.add(new JScrollPane(table));
+                allRoomData.add(tableData);
             }
 
-            outputPanel.revalidate();
-            outputPanel.repaint();
+            currentRoom = 0;
+            showRoom(currentRoom);
+
         } catch (NumberFormatException ex) {
             outputPanel.add(new JLabel("Invalid input. Please enter valid numbers."));
             outputPanel.revalidate();
             outputPanel.repaint();
         }
+    }
+
+    private void showRoom(int roomIndex) {
+        if (roomIndex < 0 || roomIndex >= allRoomData.size()) return;
+        currentRoom = roomIndex;
+        outputPanel.removeAll();
+
+        outputPanel.add(new JLabel("Room " + (currentRoom + 1) + ":"));
+        String[][] data = allRoomData.get(currentRoom);
+        String[] columnNames = {"Seat No.", "Roll No."};
+        JTable table = new JTable(data, columnNames);
+        table.setEnabled(false);
+        table.setRowHeight(25);
+        outputPanel.add(new JScrollPane(table));
+
+        outputPanel.revalidate();
+        outputPanel.repaint();
     }
 
     public static void main(String[] args) {
