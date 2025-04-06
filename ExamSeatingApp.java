@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -16,35 +15,52 @@ public class ExamSeatingApp {
 
     public ExamSeatingApp() {
         frame = new JFrame("Exam Seating Arrangement");
-        frame.setSize(1000, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setMinimumSize(new Dimension(600, 400));
         frame.setLayout(new BorderLayout());
 
-        JPanel inputPanel = new JPanel(new FlowLayout());
-        inputPanel.add(new JLabel("Number of Rooms:"));
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        inputPanel.add(new JLabel("Number of Rooms:"), gbc);
+        gbc.gridx = 1;
         roomsField = new JTextField(5);
-        inputPanel.add(roomsField);
+        inputPanel.add(roomsField, gbc);
 
-        inputPanel.add(new JLabel("Number of Students:"));
+        gbc.gridx = 0; gbc.gridy = 1;
+        inputPanel.add(new JLabel("Number of Students:"), gbc);
+        gbc.gridx = 1;
         studentsField = new JTextField(5);
-        inputPanel.add(studentsField);
+        inputPanel.add(studentsField, gbc);
 
-        inputPanel.add(new JLabel("Rows per Room: (Eg-A,B,C)"));
+        gbc.gridx = 0; gbc.gridy = 2;
+        inputPanel.add(new JLabel("Rows per Room:"), gbc);
+        gbc.gridx = 1;
         rowsField = new JTextField(5);
-        inputPanel.add(rowsField);
+        inputPanel.add(rowsField, gbc);
 
-        inputPanel.add(new JLabel("Seats per Row:"));
+        gbc.gridx = 0; gbc.gridy = 3;
+        inputPanel.add(new JLabel("Seats per Row:"), gbc);
+        gbc.gridx = 1;
         seatsPerRowField = new JTextField(5);
-        inputPanel.add(seatsPerRowField);
+        inputPanel.add(seatsPerRowField, gbc);
 
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         JButton generateButton = new JButton("Generate Seating Chart");
-        inputPanel.add(generateButton);
+        inputPanel.add(generateButton, gbc);
 
         frame.add(inputPanel, BorderLayout.NORTH);
 
         outputPanel = new JPanel();
         outputPanel.setLayout(new BoxLayout(outputPanel, BoxLayout.Y_AXIS));
-        frame.add(new JScrollPane(outputPanel), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(outputPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        frame.add(scrollPane, BorderLayout.CENTER);
 
         JPanel navPanel = new JPanel();
         prevButton = new JButton("Previous Room");
@@ -89,17 +105,16 @@ public class ExamSeatingApp {
                 for (int row = 0; row < numRows; row++) {
                     char rowLabel = (char) ('A' + row);
                     for (int seat = 1; seat <= seatsPerRow; seat++) {
-                        String seatLabel = rowLabel + String.valueOf(seat);
+                        String seatLabel = rowLabel + seat;
                         tableData[rowIndex][0] = seatLabel;
                         if (seat % 2 == 1 && !studentQueue.isEmpty()) {
                             tableData[rowIndex][1] = String.valueOf(studentQueue.poll());
                         } else {
-                            tableData[rowIndex][1] = "EmptySeat";
+                            tableData[rowIndex][1] = "-";
                         }
                         rowIndex++;
                     }
                 }
-
                 allRoomData.add(tableData);
             }
 
@@ -118,19 +133,27 @@ public class ExamSeatingApp {
         currentRoom = roomIndex;
         outputPanel.removeAll();
 
-        outputPanel.add(new JLabel("Room " + (currentRoom + 1) + ":"));
+        JLabel title = new JLabel("Room " + (currentRoom + 1) + ":");
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        outputPanel.add(title);
+
         String[][] data = allRoomData.get(currentRoom);
         String[] columnNames = {"Seat No.", "Roll No."};
         JTable table = new JTable(data, columnNames);
         table.setEnabled(false);
-        table.setRowHeight(25);
-        outputPanel.add(new JScrollPane(table));
+        table.setRowHeight(30);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollPane.setPreferredSize(new Dimension(frame.getWidth() - 50, 400));
+        outputPanel.add(scrollPane);
 
         outputPanel.revalidate();
         outputPanel.repaint();
     }
 
     public static void main(String[] args) {
-        new ExamSeatingApp();
+        SwingUtilities.invokeLater(ExamSeatingApp::new);
     }
 }
