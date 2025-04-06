@@ -56,7 +56,6 @@ public class ExamSeatingApp {
             int numRows = Integer.parseInt(rowsField.getText());
             int seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
 
-            int totalSeats = numRooms * numRows * seatsPerRow;
             if ((numRooms * numRows * (seatsPerRow + 1) / 2) < numStudents) {
                 outputPanel.add(new JLabel("Error: Not enough seats with spacing between students!"));
                 outputPanel.revalidate();
@@ -71,24 +70,27 @@ public class ExamSeatingApp {
 
             for (int r = 1; r <= numRooms; r++) {
                 outputPanel.add(new JLabel("Room " + r + ":"));
-                String[][] data = new String[numRows][seatsPerRow];
-                String[] columnNames = new String[seatsPerRow];
 
-                for (int i = 0; i < seatsPerRow; i++) {
-                    columnNames[i] = String.valueOf(i + 1);
-                }
+                String[][] tableData = new String[numRows * seatsPerRow][2];
+                String[] columnNames = {"Seat No.", "Roll No."};
+                int rowIndex = 0;
 
                 for (int row = 0; row < numRows; row++) {
-                    for (int seat = 0; seat < seatsPerRow; seat++) {
-                        if (seat % 2 == 0 && !studentQueue.isEmpty()) {
-                            data[row][seat] = "Roll No: " + studentQueue.poll();
+                    char rowLabel = (char) ('A' + row);
+                    for (int seat = 1; seat <= seatsPerRow; seat++) {
+                        String seatLabel = rowLabel + String.valueOf(seat);
+                        if (seat % 2 == 1 && !studentQueue.isEmpty()) {
+                            tableData[rowIndex][0] = seatLabel;
+                            tableData[rowIndex][1] = String.valueOf(studentQueue.poll());
                         } else {
-                            data[row][seat] = "";
+                            tableData[rowIndex][0] = seatLabel;
+                            tableData[rowIndex][1] = "-";
                         }
+                        rowIndex++;
                     }
                 }
 
-                JTable table = new JTable(data, columnNames);
+                JTable table = new JTable(tableData, columnNames);
                 table.setEnabled(false);
                 table.setRowHeight(25);
                 outputPanel.add(new JScrollPane(table));
