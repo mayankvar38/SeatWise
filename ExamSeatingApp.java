@@ -94,7 +94,7 @@ public class ExamSeatingApp {
                         if (seat % 2 == 1 && !studentQueue.isEmpty()) {
                             tableData[rowIndex][1] = String.valueOf(studentQueue.poll());
                         } else {
-                            tableData[rowIndex][1] = "-";
+                            tableData[rowIndex][1] = "EmptySeat";
                         }
                         rowIndex++;
                     }
