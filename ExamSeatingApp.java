@@ -39,13 +39,13 @@ public class ExamSeatingApp {
         inputPanel.add(studentsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        inputPanel.add(new JLabel("Rows per Room:"), gbc);
+        inputPanel.add(new JLabel("Rows per Room:(Example : A,B,C)"), gbc);
         gbc.gridx = 1;
         rowsField = new JTextField(5);
         inputPanel.add(rowsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        inputPanel.add(new JLabel("Seats per Row:"), gbc);
+        inputPanel.add(new JLabel("Seats per Row:(Example : A1,B2,C3)"), gbc);
         gbc.gridx = 1;
         seatsPerRowField = new JTextField(5);
         inputPanel.add(seatsPerRowField, gbc);
@@ -105,7 +105,7 @@ public class ExamSeatingApp {
                 for (int row = 0; row < numRows; row++) {
                     char rowLabel = (char) ('A' + row);
                     for (int seat = 1; seat <= seatsPerRow; seat++) {
-                        String seatLabel = rowLabel + seat;
+                        String seatLabel = rowLabel + String.valueOf(seat);
                         tableData[rowIndex][0] = seatLabel;
                         if (seat % 2 == 1 && !studentQueue.isEmpty()) {
                             tableData[rowIndex][1] = String.valueOf(studentQueue.poll());
