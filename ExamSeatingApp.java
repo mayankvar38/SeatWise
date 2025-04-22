@@ -14,7 +14,7 @@ public class ExamSeatingApp {
     private java.util.List<String[][]> allRoomData;
 
     public ExamSeatingApp() {
-        frame = new JFrame("Exam Seating Arrangement");
+        frame = new JFrame("SeatWise");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setMinimumSize(new Dimension(600, 400));
