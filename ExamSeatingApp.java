@@ -6,7 +6,6 @@ import java.util.Queue;
 
 public class ExamSeatingApp {
     private JFrame frame;
-    private JTable table;
     private JTextField roomsField, studentsField, rowsField, seatsPerRowField;
     private JPanel outputPanel;
     private JButton prevButton, nextButton;
@@ -39,13 +38,13 @@ public class ExamSeatingApp {
         inputPanel.add(studentsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        inputPanel.add(new JLabel("Rows per Room:(Example : A,B,C)"), gbc);
+        inputPanel.add(new JLabel("Rows per Room:"), gbc);
         gbc.gridx = 1;
         rowsField = new JTextField(5);
         inputPanel.add(rowsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        inputPanel.add(new JLabel("Seats per Row:(Example : A1,B2,C3)"), gbc);
+        inputPanel.add(new JLabel("Seats per Row:"), gbc);
         gbc.gridx = 1;
         seatsPerRowField = new JTextField(5);
         inputPanel.add(seatsPerRowField, gbc);
@@ -139,24 +138,35 @@ public class ExamSeatingApp {
         outputPanel.add(title);
 
         String[][] data = allRoomData.get(currentRoom);
-        String[] columnNames = {"Seat No.", "Roll No."};
-        JTable table = new JTable(data, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
+
+        String[] columnNames = new String[6];
+        for (int i = 0; i < 3; i++) {
+            columnNames[i * 2] = "Enrollment";
+            columnNames[i * 2 + 1] = "Seat";
+        }
+
+        String[][] tableData = new String[(int) Math.ceil(data.length / 3.0)][6];
+        for (int i = 0; i < data.length; i += 3) {
+            for (int j = 0; j < 3; j++) {
+                int index = i + j;
+                if (index < data.length) {
+                    tableData[i / 3][j * 2] = data[index][1];
+                    tableData[i / 3][j * 2 + 1] = data[index][0];
+                } else {
+                    tableData[i / 3][j * 2] = "";
+                    tableData[i / 3][j * 2 + 1] = "";
+                }
             }
-        };
+        }
 
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        table.setRowHeight(Math.max(30, frame.getHeight() / 30));
-        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 15));
-
+        JTable table = new JTable(tableData, columnNames);
+        table.setRowHeight(30);
+        table.setFont(new Font("Arial", Font.PLAIN, 16));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
         scrollPane.setPreferredSize(new Dimension(frame.getWidth() - 50, frame.getHeight() - 300));
-        outputPanel.add(scrollPane);
 
+        outputPanel.add(scrollPane);
         outputPanel.revalidate();
         outputPanel.repaint();
     }
