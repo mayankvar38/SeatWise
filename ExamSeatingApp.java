@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
@@ -163,6 +164,13 @@ public class ExamSeatingApp {
         table.setRowHeight(30);
         table.setFont(new Font("Arial", Font.PLAIN, 16));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(frame.getWidth() - 50, frame.getHeight() - 300));
 
