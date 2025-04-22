@@ -39,13 +39,13 @@ public class ExamSeatingApp {
         inputPanel.add(studentsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        inputPanel.add(new JLabel("Rows per Room:"), gbc);
+        inputPanel.add(new JLabel("Rows per Room:(Eg:A,B,c)"), gbc);
         gbc.gridx = 1;
         rowsField = new JTextField(5);
         inputPanel.add(rowsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        inputPanel.add(new JLabel("Seats per Row:"), gbc);
+        inputPanel.add(new JLabel("Seats per Row:(Eg:A1,B2,C3)"), gbc);
         gbc.gridx = 1;
         seatsPerRowField = new JTextField(5);
         inputPanel.add(seatsPerRowField, gbc);
@@ -142,7 +142,7 @@ public class ExamSeatingApp {
 
         String[] columnNames = new String[6];
         for (int i = 0; i < 3; i++) {
-            columnNames[i * 2] = "Enrollment";
+            columnNames[i * 2] = "Enrollment No.";
             columnNames[i * 2 + 1] = "Seat";
         }
 
