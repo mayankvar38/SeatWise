@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
@@ -12,6 +11,8 @@ public class ExamSeatingApp {
     private JButton prevButton, nextButton;
     private int currentRoom = 0;
     private java.util.List<String[][]> allRoomData;
+    private int numRows;
+    private int seatsPerRow;
 
     public ExamSeatingApp() {
         frame = new JFrame("SeatWise");
@@ -39,13 +40,13 @@ public class ExamSeatingApp {
         inputPanel.add(studentsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        inputPanel.add(new JLabel("Rows per Room:(Eg:A,B,c)"), gbc);
+        inputPanel.add(new JLabel("Rows per Room (number):"), gbc);
         gbc.gridx = 1;
         rowsField = new JTextField(5);
         inputPanel.add(rowsField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        inputPanel.add(new JLabel("Seats per Row:(Eg:A1,B2,C3)"), gbc);
+        inputPanel.add(new JLabel("Seats per Row (number):"), gbc);
         gbc.gridx = 1;
         seatsPerRowField = new JTextField(5);
         inputPanel.add(seatsPerRowField, gbc);
@@ -81,8 +82,8 @@ public class ExamSeatingApp {
         try {
             int numRooms = Integer.parseInt(roomsField.getText());
             int numStudents = Integer.parseInt(studentsField.getText());
-            int numRows = Integer.parseInt(rowsField.getText());
-            int seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
+            numRows = Integer.parseInt(rowsField.getText());
+            seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
 
             if ((numRooms * numRows * (seatsPerRow + 1) / 2) < numStudents) {
                 outputPanel.add(new JLabel("Error: Not enough seats with spacing between students!"));
@@ -138,43 +139,40 @@ public class ExamSeatingApp {
         title.setFont(new Font("Arial", Font.BOLD, 18));
         outputPanel.add(title);
 
+        JPanel seatPanel = new JPanel();
+        seatPanel.setLayout(new GridLayout(numRows, seatsPerRow, 10, 10));
+        seatPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
         String[][] data = allRoomData.get(currentRoom);
+        int rowIndex = 0;
 
-        String[] columnNames = new String[6];
-        for (int i = 0; i < 3; i++) {
-            columnNames[i * 2] = "Enrollment No.";
-            columnNames[i * 2 + 1] = "Seat";
-        }
+        for (int row = 0; row < numRows; row++) {
+            for (int seat = 1; seat <= seatsPerRow; seat++) {
+                JPanel chair = new JPanel();
+                chair.setPreferredSize(new Dimension(80, 50));
+                chair.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                chair.setLayout(new BorderLayout());
 
-        String[][] tableData = new String[(int) Math.ceil(data.length / 3.0)][6];
-        for (int i = 0; i < data.length; i += 3) {
-            for (int j = 0; j < 3; j++) {
-                int index = i + j;
-                if (index < data.length) {
-                    tableData[i / 3][j * 2] = data[index][1];
-                    tableData[i / 3][j * 2 + 1] = data[index][0];
+                JLabel seatLabel = new JLabel((char) ('A' + row) + "" + seat, SwingConstants.CENTER);
+                seatLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+
+                JLabel studentLabel = new JLabel(data[rowIndex][1], SwingConstants.CENTER);
+                studentLabel.setFont(new Font("Arial", Font.BOLD, 14));
+
+                if (!data[rowIndex][1].equals("-")) {
+                    chair.setBackground(Color.GREEN);  // Occupied
                 } else {
-                    tableData[i / 3][j * 2] = "";
-                    tableData[i / 3][j * 2 + 1] = "";
+                    chair.setBackground(Color.WHITE);  // Empty
                 }
+
+                chair.add(seatLabel, BorderLayout.NORTH);
+                chair.add(studentLabel, BorderLayout.CENTER);
+                seatPanel.add(chair);
+                rowIndex++;
             }
         }
 
-        JTable table = new JTable(tableData, columnNames);
-        table.setRowHeight(30);
-        table.setFont(new Font("Arial", Font.PLAIN, 16));
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
-
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(frame.getWidth() - 50, frame.getHeight() - 300));
-
-        outputPanel.add(scrollPane);
+        outputPanel.add(seatPanel);
         outputPanel.revalidate();
         outputPanel.repaint();
     }
