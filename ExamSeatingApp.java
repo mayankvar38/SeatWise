@@ -94,21 +94,25 @@ public class ExamSeatingApp {
             int numStudents = Integer.parseInt(studentsField.getText());
             int numRows = Integer.parseInt(rowsField.getText());
             int seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
-
-            if ((numRooms * numRows * (seatsPerRow + 1) / 2) < numStudents) {
+    
+            // Only count usable (even-indexed) seats
+            int usableSeatsPerRow = (seatsPerRow + 1) / 2;
+            int totalUsableSeats = numRooms * numRows * usableSeatsPerRow;
+    
+            if (totalUsableSeats < numStudents) {
                 outputPanel.add(new JLabel("Error: Not enough seats available with spacing."));
                 outputPanel.revalidate();
                 outputPanel.repaint();
                 return;
             }
-
+    
             Queue<String> studentQueue = new LinkedList<>();
             for (int i = 1; i <= numStudents; i++) {
                 studentQueue.add("S" + i);
             }
-
+    
             allRoomData = new LinkedList<>();
-
+    
             for (int r = 0; r < numRooms; r++) {
                 String[][] roomLayout = new String[numRows][seatsPerRow];
                 for (int i = 0; i < numRows; i++) {
@@ -122,16 +126,17 @@ public class ExamSeatingApp {
                 }
                 allRoomData.add(roomLayout);
             }
-
+    
             currentRoom = 0;
             showRoom(currentRoom);
-
+    
         } catch (NumberFormatException ex) {
             outputPanel.add(new JLabel("Invalid input. Please enter valid numbers."));
             outputPanel.revalidate();
             outputPanel.repaint();
         }
     }
+    
 
     private void showRoom(int roomIndex) {
         if (roomIndex < 0 || roomIndex >= allRoomData.size()) return;
