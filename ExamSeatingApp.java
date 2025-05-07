@@ -3,14 +3,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.List;
+
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
 
 public class ExamSeatingApp {
     private JFrame frame;
     private JTextField roomsField, studentsField, rowsField, seatsPerRowField;
     private JPanel outputPanel;
-    private JButton prevButton, nextButton;
+    private JButton prevButton, nextButton, pdfButton;
     private int currentRoom = 0;
-    private java.util.List<String[][]> allRoomData;
+    private List<String[][]> allRoomData;
     private ImageIcon chairIcon;
 
     public ExamSeatingApp() {
@@ -76,13 +80,16 @@ public class ExamSeatingApp {
         JPanel navPanel = new JPanel();
         prevButton = new JButton("Previous Room");
         nextButton = new JButton("Next Room");
+        pdfButton = new JButton("Download PDF");
         navPanel.add(prevButton);
         navPanel.add(nextButton);
+        navPanel.add(pdfButton);
         frame.add(navPanel, BorderLayout.SOUTH);
 
         generateButton.addActionListener(this::generateSeatingChart);
         prevButton.addActionListener(e -> showRoom(currentRoom - 1));
         nextButton.addActionListener(e -> showRoom(currentRoom + 1));
+        pdfButton.addActionListener(e -> generatePDF());
 
         frame.setVisible(true);
     }
@@ -94,25 +101,24 @@ public class ExamSeatingApp {
             int numStudents = Integer.parseInt(studentsField.getText());
             int numRows = Integer.parseInt(rowsField.getText());
             int seatsPerRow = Integer.parseInt(seatsPerRowField.getText());
-    
-            // Only count usable (even-indexed) seats
+
             int usableSeatsPerRow = (seatsPerRow + 1) / 2;
             int totalUsableSeats = numRooms * numRows * usableSeatsPerRow;
-    
+
             if (totalUsableSeats < numStudents) {
                 outputPanel.add(new JLabel("Error: Not enough seats available with spacing."));
                 outputPanel.revalidate();
                 outputPanel.repaint();
                 return;
             }
-    
+
             Queue<String> studentQueue = new LinkedList<>();
             for (int i = 1; i <= numStudents; i++) {
                 studentQueue.add("S" + i);
             }
-    
+
             allRoomData = new LinkedList<>();
-    
+
             for (int r = 0; r < numRooms; r++) {
                 String[][] roomLayout = new String[numRows][seatsPerRow];
                 for (int i = 0; i < numRows; i++) {
@@ -126,17 +132,16 @@ public class ExamSeatingApp {
                 }
                 allRoomData.add(roomLayout);
             }
-    
+
             currentRoom = 0;
             showRoom(currentRoom);
-    
+
         } catch (NumberFormatException ex) {
             outputPanel.add(new JLabel("Invalid input. Please enter valid numbers."));
             outputPanel.revalidate();
             outputPanel.repaint();
         }
     }
-    
 
     private void showRoom(int roomIndex) {
         if (roomIndex < 0 || roomIndex >= allRoomData.size()) return;
@@ -185,6 +190,54 @@ public class ExamSeatingApp {
         outputPanel.add(seatGrid);
         outputPanel.revalidate();
         outputPanel.repaint();
+    }
+
+    private void generatePDF() {
+        if (allRoomData == null || allRoomData.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "No data to export. Please generate seating chart first.");
+            return;
+        }
+
+        try {
+            Document document = new Document();
+            PdfWriter.getInstance(document, new java.io.FileOutputStream("C:/Users/Mayank/Downloads/SeatingArrangement.pdf"));
+            document.open();
+
+            for (int roomIndex = 0; roomIndex < allRoomData.size(); roomIndex++) {
+                String[][] data = allRoomData.get(roomIndex);
+
+                if (roomIndex > 0) document.newPage();
+
+                document.add(new Paragraph("Room " + (roomIndex + 1),
+                        new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD)));
+
+                PdfPTable table = new PdfPTable(data[0].length);
+                table.setSpacingBefore(20);
+                table.setWidthPercentage(100);
+
+                for (int i = 0; i < data.length; i++) {
+                    for (int j = 0; j < data[i].length; j++) {
+                        String seatLabel = (char) ('A' + i) + String.valueOf(j + 1);
+                        String student = data[i][j];
+                        String content = seatLabel + "\n" + (student.equals("-") ? "Empty" : student);
+
+                        PdfPCell cell = new PdfPCell(new Phrase(content));
+                        cell.setFixedHeight(50);
+                        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        table.addCell(cell);
+                    }
+                }
+
+                document.add(table);
+            }
+
+            document.close();
+            JOptionPane.showMessageDialog(frame, "PDF saved as SeatingArrangement.pdf");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(frame, "Error generating PDF: " + ex.getMessage());
+        }
     }
 
     public static void main(String[] args) {
