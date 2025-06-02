@@ -31,7 +31,6 @@ public class ExamSeatingApp {
             JOptionPane.showMessageDialog(frame, "Chair image not found!");
         }
 
-        // Input Panel
         JPanel inputPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
@@ -69,14 +68,12 @@ public class ExamSeatingApp {
 
         frame.add(inputPanel, BorderLayout.NORTH);
 
-        // Output Panel
         outputPanel = new JPanel();
         outputPanel.setLayout(new BoxLayout(outputPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(outputPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Navigation Panel
         JPanel navPanel = new JPanel();
         prevButton = new JButton("Previous Room");
         nextButton = new JButton("Next Room");
@@ -198,45 +195,56 @@ public class ExamSeatingApp {
             return;
         }
 
-        try {
-            Document document = new Document();
-            PdfWriter.getInstance(document, new java.io.FileOutputStream("C:/Users/Mayank/Downloads/SeatingArrangement.pdf"));
-            document.open();
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setSelectedFile(new java.io.File("SeatingArrangement.pdf"));
+        int userSelection = fileChooser.showSaveDialog(frame);
 
-            for (int roomIndex = 0; roomIndex < allRoomData.size(); roomIndex++) {
-                String[][] data = allRoomData.get(roomIndex);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            try {
+                Document document = new Document();
+                PdfWriter.getInstance(document, new java.io.FileOutputStream(fileToSave));
+                document.open();
 
-                if (roomIndex > 0) document.newPage();
+                for (int roomIndex = 0; roomIndex < allRoomData.size(); roomIndex++) {
+                    String[][] data = allRoomData.get(roomIndex);
 
-                document.add(new Paragraph("Room " + (roomIndex + 1),
-                        new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD)));
+                    if (roomIndex > 0) document.newPage();
 
-                PdfPTable table = new PdfPTable(data[0].length);
-                table.setSpacingBefore(20);
-                table.setWidthPercentage(100);
+                    Paragraph title = new Paragraph("Room " + (roomIndex + 1),
+                            new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD));
+                    title.setAlignment(Element.ALIGN_CENTER);
+                    title.setSpacingAfter(10f);
+                    document.add(title);
 
-                for (int i = 0; i < data.length; i++) {
-                    for (int j = 0; j < data[i].length; j++) {
-                        String seatLabel = (char) ('A' + i) + String.valueOf(j + 1);
-                        String student = data[i][j];
-                        String content = seatLabel + "\n" + (student.equals("-") ? "Empty" : student);
+                    PdfPTable table = new PdfPTable(data[0].length);
+                    table.setSpacingBefore(10);
+                    table.setWidthPercentage(100);
 
-                        PdfPCell cell = new PdfPCell(new Phrase(content));
-                        cell.setFixedHeight(50);
-                        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        table.addCell(cell);
+                    for (int i = 0; i < data.length; i++) {
+                        for (int j = 0; j < data[i].length; j++) {
+                            String seatLabel = (char) ('A' + i) + String.valueOf(j + 1);
+                            String student = data[i][j];
+                            String content = seatLabel + "\n" + (student.equals("-") ? "Empty" : student);
+
+                            PdfPCell cell = new PdfPCell(new Phrase(content));
+                            cell.setFixedHeight(50);
+                            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                            table.addCell(cell);
+                        }
                     }
+
+                    document.add(table);
                 }
 
-                document.add(table);
+                document.close();
+                JOptionPane.showMessageDialog(frame, "PDF saved to:\n" + fileToSave.getAbsolutePath());
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Error generating PDF: " + ex.getMessage());
             }
-
-            document.close();
-            JOptionPane.showMessageDialog(frame, "PDF saved as SeatingArrangement.pdf");
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(frame, "Error generating PDF: " + ex.getMessage());
         }
     }
 
